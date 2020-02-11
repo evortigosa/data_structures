@@ -1,7 +1,6 @@
-/*  Algoritmos e Estruturas de Dados II - Trabalho 2 - ¡rvores-B
-            Bruno Ricobello Callovi, n∞ USP 6792836
-          Evandro Scudeleti Ortigossa, n∞ USP 6793135
-          Bacharelado em CiÍncias de ComputaÁ„o 2009           */
+/*  Algoritmos e Estruturas de Dados II - Trabalho 2 - √Årvores-B
+          Evandro Scudeleti Ortigossa, n¬∞ USP 6793135
+          Bacharelado em Ci√™ncias de Computa√ß√£o 2009           */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +10,7 @@
 #define REGTAM 256
 #define PAGTAM 4
 #define CARQTDE sizeof(long)
-#define PAGBYTE (CARQTDE*(3*PAGTAM + 1))    /* DefiniÁ„o das principais constantes utilizadas no sistema */
+#define PAGBYTE (CARQTDE*(3*PAGTAM + 1))    /* Defini√ß√£o das principais constantes utilizadas no sistema */
 #define DELIMITADOR '@'
 #define DELIMITACAO "%[^@]s"
 #define PREENCHE '#'
@@ -20,7 +19,7 @@
 typedef char tipoCodigo[6];
 typedef char *tipoString;
 
-typedef struct {                            /* Estrutura que recebe os dados de uma referÍncia */
+typedef struct {                            /* Estrutura que recebe os dados de uma refer√™ncia */
     tipoCodigo codigo;
     tipoString titulo;
     tipoString autor;
@@ -28,7 +27,7 @@ typedef struct {                            /* Estrutura que recebe os dados de 
     tipoString veiculo;
 } Referencia;
 
-typedef struct {                            /* Estrutura que recebe uma p·gina completa de ¡rvore-B */
+typedef struct {                            /* Estrutura que recebe uma p√°gina completa de √Årvore-B */
     long pagEndereco;
     long offsetPagina[PAGTAM+1];
     int codigoReg[PAGTAM];
@@ -93,7 +92,7 @@ return 0;
 void criaArquivos(FILE *indice, FILE *dados) {
 
     if (indice== NULL) {
-        indice= fopen("index.dat", "wb");        /* Se n„o existirem, esta funÁ„o cria os arquivos de Ìndice e dados */
+        indice= fopen("index.dat", "wb");        /* Se n√£o existirem, esta fun√ß√£o cria os arquivos de √≠ndice e dados */
         fclose(indice);
         indice= NULL;
     }
@@ -112,7 +111,7 @@ void processaComando(int *opcao) {
 
     if (strcasecmp(comando, "INSERIR")== 0) (*opcao)= 1;
     else if (strcasecmp(comando, "ALTERAR")== 0) (*opcao)= 2;
-    else if (strcasecmp(comando, "REMOVER")== 0) (*opcao)= 3;        /* Processamento de comandos inseridos pelo usu·rio */
+    else if (strcasecmp(comando, "REMOVER")== 0) (*opcao)= 3;        /* Processamento de comandos inseridos pelo usu√°rio */
     else if (strcasecmp(comando, "BUSCAR")== 0) (*opcao)= 4;
     else if (strcasecmp(comando, "FINALIZAR")== 0) (*opcao)= 5;
     else (*opcao)= 0;
@@ -130,7 +129,7 @@ void recebeReferencia(FILE *indice, FILE *dados, long posicao) {
     if (posicao== -1) {
         printf("Codigo: ");
         scanf("\n");
-        gets(registro.codigo);              /* Respectivos dados de uma referÍncia s„o captados */
+        gets(registro.codigo);              /* Respectivos dados de uma refer√™ncia s√£o captados */
     }
     else {
         fseek(dados, posicao, SEEK_SET);
@@ -164,7 +163,7 @@ void recebeReferencia(FILE *indice, FILE *dados, long posicao) {
 
     free(registro.titulo);
     free(registro.autor);
-    free(registro.anoPublicacao);                /* LiberaÁ„o de memÛria alocada pelo registro de referÍncias */
+    free(registro.anoPublicacao);                /* Libera√ß√£o de mem√≥ria alocada pelo registro de refer√™ncias */
     free(registro.veiculo);
 }
 
@@ -187,7 +186,7 @@ void imprimeReferencia(FILE *indice, FILE *dados, Referencia registro, long posi
             else if (i== 3) fprintf(dados, "%s", registro.anoPublicacao);
             else if (i== 4) fprintf(dados, "%s", registro.veiculo);
 
-            fputc(DELIMITADOR, dados);           /* Impress„o dos dados da referÍncia, delimitadores de campo e */
+            fputc(DELIMITADOR, dados);           /* Impress√£o dos dados da refer√™ncia, delimitadores de campo e */
             tamanho++;                           /* caracteres de preenchimento no final do arquivo de dados */
         }
         else if (i== 5) i= tamanho;
@@ -206,7 +205,7 @@ void imprimeIndice(FILE *indice, ArvoreB pagina) {
     else fseek(indice, pagina.pagEndereco, SEEK_SET);
 
     for ((i= 0); (i< PAGTAM); (i++)) {
-        fwrite(&(pagina.offsetPagina[i]), CARQTDE, 1, indice);       /* Impress„o de uma p·gina completa da ¡rvore-B */
+        fwrite(&(pagina.offsetPagina[i]), CARQTDE, 1, indice);       /* Impress√£o de uma p√°gina completa da √Årvore-B */
         fwrite(&(pagina.codigoReg[i]), CARQTDE, 1, indice);
         fwrite(&(pagina.offsetReg[i]), CARQTDE, 1, indice);
     }
@@ -218,7 +217,7 @@ void inicializaIndice(FILE *indice, int codigo) {
     long raiz= 2*CARQTDE;
     ArvoreB pagina;
 
-    fwrite(&raiz, CARQTDE, 1, indice);           /* InicializaÁ„o do arquivo de Ìndices com os dados do primeiro */
+    fwrite(&raiz, CARQTDE, 1, indice);           /* Inicializa√ß√£o do arquivo de √≠ndices com os dados do primeiro */
     fwrite(&topoPilha, CARQTDE, 1, indice);      /* registro inserido no arquivo de dados */
     inicializaPagina(&pagina, -1);
     pagina.codigoReg[PAGTAM-1]= codigo;
@@ -229,7 +228,7 @@ void inicializaPagina(ArvoreB *pagina, long endereco) {
     int i;
 
     for ((i= 0); (i< PAGTAM); (i++)) {
-        (*pagina).offsetPagina[i]= -1;           /* InicializaÁ„o de uma p·gina de ¡rvore-B */
+        (*pagina).offsetPagina[i]= -1;           /* Inicializa√ß√£o de uma p√°gina de √Årvore-B */
         (*pagina).codigoReg[i]= 0;
         (*pagina).offsetReg[i]= 0;
     }
@@ -248,8 +247,8 @@ void insereOrdenado(FILE *indice, ArvoreB *pagina, int codigo, long posRegistro,
 
     for ((i= (PAGTAM-1)); ((i>= 0) && (posInsercao== -1)); (i--)) if ((*pagina).codigoReg[i]< codigo) posInsercao= i;
     for ((i= 0); (i< posInsercao); (i++)) {
-        (*pagina).offsetPagina[i]= (*pagina).offsetPagina[i+1];      /* PosiÁ„o ideal para inserÁ„o de novo dado È encontrada */
-        (*pagina).codigoReg[i]= (*pagina).codigoReg[i+1];            /* Demais dados s„o deslocados para receber o novo dado */
+        (*pagina).offsetPagina[i]= (*pagina).offsetPagina[i+1];      /* Posi√ß√£o ideal para inser√ß√£o de novo dado √© encontrada */
+        (*pagina).codigoReg[i]= (*pagina).codigoReg[i+1];            /* Demais dados s√£o deslocados para receber o novo dado */
         (*pagina).offsetReg[i]= (*pagina).offsetReg[i+1];
         (*pagina).offsetPagina[i+1]= (*pagina).offsetPagina[i+2];
     }
@@ -270,7 +269,7 @@ void splitDeRaiz(FILE *indice, ArvoreB *pagina, int codigo, long posRegistro, lo
     if (topoPagDel== -1) inicializaPagina(&splitRaiz, ftell(indice));
     else inicializaPagina(&splitRaiz, topoPagDel);
 
-    splitRaiz.offsetPagina[PAGTAM-1]= (*pagina).pagEndereco;    /* CriaÁ„o e impress„o de nova raiz */
+    splitRaiz.offsetPagina[PAGTAM-1]= (*pagina).pagEndereco;    /* Cria√ß√£o e impress√£o de nova raiz */
     splitRaiz.codigoReg[PAGTAM-1]= codigo;
     splitRaiz.offsetReg[PAGTAM-1]= posRegistro;
     splitRaiz.offsetPagina[PAGTAM]= posicaoPagina;
@@ -287,17 +286,17 @@ long split(FILE *indice, ArvoreB *pagina, int *codigo, long *posRegistro, long p
     ArvoreB splitPagina, auxPagina;
 
     topoPagDel= pop(indice);
-    if (topoPagDel== -1) inicializaPagina(&splitPagina, ftell(indice));   /* Nova p·gina È inserida na posiÁ„o indicada pela pilha de excluÌdos */
+    if (topoPagDel== -1) inicializaPagina(&splitPagina, ftell(indice));   /* Nova p√°gina √© inserida na posi√ß√£o indicada pela pilha de exclu√≠dos */
     else inicializaPagina(&splitPagina, topoPagDel);
 
     inicializaPagina(&auxPagina, (*pagina).pagEndereco);
 
-    for ((i= (PAGTAM/2)); (i< PAGTAM); (i++)) {       /* Maiores valores de dados s„o passados para nova p·gina */
+    for ((i= (PAGTAM/2)); (i< PAGTAM); (i++)) {       /* Maiores valores de dados s√£o passados para nova p√°gina */
         splitPagina.codigoReg[i]= (*pagina).codigoReg[i];
         splitPagina.offsetReg[i]= (*pagina).offsetReg[i];
         splitPagina.offsetPagina[i+1]= (*pagina).offsetPagina[i+1];
     }
-    for ((i= 0); (i< (PAGTAM/2)); (i++)) {            /* Demais valores da p·gina s„o passados para um auxiliar de forma ordenada*/
+    for ((i= 0); (i< (PAGTAM/2)); (i++)) {            /* Demais valores da p√°gina s√£o passados para um auxiliar de forma ordenada*/
         auxPagina.offsetPagina[PAGTAM-1-i]= (*pagina).offsetPagina[(PAGTAM/2)-1-i];
         auxPagina.codigoReg[PAGTAM-1-i]= (*pagina).codigoReg[(PAGTAM/2)-1-i];
         auxPagina.offsetReg[PAGTAM-1-i]= (*pagina).offsetReg[(PAGTAM/2)-1-i];
@@ -320,7 +319,7 @@ long split(FILE *indice, ArvoreB *pagina, int *codigo, long *posRegistro, long p
             }
         }
         splitPagina.offsetPagina[PAGTAM/2]= offSet2;
-    }              /* Busca da posiÁ„o ideal para o novo dado e retorno do elemento intermedi·rio para a p·gina "raiz" */
+    }              /* Busca da posi√ß√£o ideal para o novo dado e retorno do elemento intermedi√°rio para a p√°gina "raiz" */
     else {
         for ((i= (PAGTAM-1)); (i>= (PAGTAM/2)); (i--)) {
             if (auxCodigo> splitPagina.codigoReg[i]) {
@@ -342,19 +341,19 @@ long split(FILE *indice, ArvoreB *pagina, int *codigo, long *posRegistro, long p
     imprimeIndice(indice, auxPagina);
     imprimeIndice(indice, splitPagina);
 
-    return splitPagina.pagEndereco;         /* Retorno da posiÁ„o, no arquivo de Ìndices, da p·gina criada pelo split */
+    return splitPagina.pagEndereco;         /* Retorno da posi√ß√£o, no arquivo de √≠ndices, da p√°gina criada pelo split */
 }
 
 long pop(FILE *indice) {
     long posInsercao, topoPilha;
 
     fseek(indice, CARQTDE, SEEK_SET);
-    fread(&posInsercao, CARQTDE, 1, indice);          /* PosiÁ„o da ˙ltima p·gina excluÌda È armazenada para retorno */
+    fread(&posInsercao, CARQTDE, 1, indice);          /* Posi√ß√£o da √∫ltima p√°gina exclu√≠da √© armazenada para retorno */
 
     if (posInsercao!= -1) {
         fseek(indice, (posInsercao+(sizeof(EXCLUIDO)-1)), SEEK_SET);
-        fread(&topoPilha, CARQTDE, 1, indice);        /* Topo da pilha È atualizado com a informaÁ„o contida apÛs os */
-        fseek(indice, CARQTDE, SEEK_SET);             /* caracteres de exclus„o na p·gina indicada pelo topo da pilha */
+        fread(&topoPilha, CARQTDE, 1, indice);        /* Topo da pilha √© atualizado com a informa√ß√£o contida ap√≥s os */
+        fseek(indice, CARQTDE, SEEK_SET);             /* caracteres de exclus√£o na p√°gina indicada pelo topo da pilha */
         fwrite(&topoPilha, CARQTDE, 1, indice);
     }
     fseek(indice, 0, SEEK_END);
@@ -368,14 +367,14 @@ void insereIndice(FILE *indice, int codigo, long posRegistro, long ponteiro, int
 
     fseek(indice, 0, SEEK_END);
 
-    if (ftell(indice)== 0) inicializaIndice(indice, codigo);    /* Caso de inserÁ„o dos primeiros dados no arquivo de Ìndice */
+    if (ftell(indice)== 0) inicializaIndice(indice, codigo);    /* Caso de inser√ß√£o dos primeiros dados no arquivo de √≠ndice */
     else {
         pesquisaArquivo(indice, &pagina, auxCodigo, &codigoPai);
 
         if (!paginaCheia(pagina)) insereOrdenado(indice, &pagina, codigo, posRegistro, ponteiro);
-        else {                                        /* Caso em que h· espaÁo na p·gina que o dado deve ser inserido */
+        else {                                        /* Caso em que h√° espa√ßo na p√°gina que o dado deve ser inserido */
             fseek(indice, 0, SEEK_SET);
-            fread(&posicao, CARQTDE, 1, indice);      /* Sen„o h· a necessidade de split de p·gina ou de raiz */
+            fread(&posicao, CARQTDE, 1, indice);      /* Sen√£o h√° a necessidade de split de p√°gina ou de raiz */
 
             if (pagina.pagEndereco== posicao) splitDeRaiz(indice, &pagina, codigo, posRegistro, ponteiro);
             else {
@@ -389,7 +388,7 @@ void insereIndice(FILE *indice, int codigo, long posRegistro, long ponteiro, int
 void alteraReferencia(FILE *indice, FILE *dados) {
     long byteOffset;
 
-    byteOffset= buscaReferecia(indice, dados);        /* Se a referÍncia existir, ser· alterada pelo usu·rio */
+    byteOffset= buscaReferecia(indice, dados);        /* Se a refer√™ncia existir, ser√° alterada pelo usu√°rio */
 
     if (byteOffset!= -1) recebeReferencia(indice, dados, byteOffset);
 }
@@ -404,13 +403,13 @@ void removeReferencia(FILE *indice, FILE *dados) {
     scanf("\n");
     gets(codChar);
     for ((i= 0); (i< strlen(codChar)); (i++)) codigo += codChar[i];
-    byteOffset= pesquisaArquivo(indice, &pagina, codigo, &codigoPai);     /* Pesquisa pelo cÛdigo da referÍncia no arquivo de Ìndices */
+    byteOffset= pesquisaArquivo(indice, &pagina, codigo, &codigoPai);     /* Pesquisa pelo c√≥digo da refer√™ncia no arquivo de √≠ndices */
 
-    if (byteOffset< 0) printf("\n\nReferencia inexistente!!!\n\n");       /* Retorno de seu respectivo byteoffset, se -1, arquivo n„o existe */
+    if (byteOffset< 0) printf("\n\nReferencia inexistente!!!\n\n");       /* Retorno de seu respectivo byteoffset, se -1, arquivo n√£o existe */
     else {
         fseek(dados, byteOffset, SEEK_SET);
         fprintf(dados, "%s", EXCLUIDO);
-        removeIndice(indice, pagina, codigo, codigoPai);                  /* Exclus„o no arquivo de dados e do respectivo Ìndice */
+        removeIndice(indice, pagina, codigo, codigoPai);                  /* Exclus√£o no arquivo de dados e do respectivo √≠ndice */
         printf("\n\nReferencia removida com sucesso!!!\n\n");
     }
 }
@@ -418,19 +417,19 @@ void removeReferencia(FILE *indice, FILE *dados) {
 int verificaFolha(ArvoreB pagina) {
 
     if (pagina.offsetPagina[PAGTAM]== -1) return 1;
-    else return 0;      /* P·ginas s„o mantidas em ordem, logo se pode verificar a existÍncia de filhos na ˙ltima posiÁ„o do vetor */
+    else return 0;      /* P√°ginas s√£o mantidas em ordem, logo se pode verificar a exist√™ncia de filhos na √∫ltima posi√ß√£o do vetor */
 }
 
 void push(FILE *indice, ArvoreB pagina) {
     long proxTopo;
 
     fseek(indice, CARQTDE, SEEK_SET);
-    fread(&proxTopo, CARQTDE, 1, indice);        /* Valor atual do topo da pilha È armazenado */
+    fread(&proxTopo, CARQTDE, 1, indice);        /* Valor atual do topo da pilha √© armazenado */
     fseek(indice, CARQTDE, SEEK_SET);
-    fwrite(&(pagina.pagEndereco), CARQTDE, 1, indice);     /* EndereÁo do novo topo da pilha È escrito no lugar do antigo */
+    fwrite(&(pagina.pagEndereco), CARQTDE, 1, indice);     /* Endere√ßo do novo topo da pilha √© escrito no lugar do antigo */
 
     fseek(indice, pagina.pagEndereco, SEEK_SET);
-    fwrite(EXCLUIDO, (sizeof(EXCLUIDO)-1), 1, indice);     /* P·gina recÈm excluÌda recebe os caracteres de exclus„o e o antigo topo da pilha */
+    fwrite(EXCLUIDO, (sizeof(EXCLUIDO)-1), 1, indice);     /* P√°gina rec√©m exclu√≠da recebe os caracteres de exclus√£o e o antigo topo da pilha */
     fwrite(&(proxTopo), CARQTDE, 1, indice);
 }
 
@@ -449,8 +448,8 @@ int removeOrdenado(ArvoreB *pagina, int codigo) {
         }
         else if ((i== 0) && ((*pagina).codigoReg[i+1]== 0)) (*pagina).offsetPagina[i+1]= -1;
     }
-    (*pagina).offsetPagina[i+1]= -1;             /* FunÁ„o respons·vel por fazer a exclus„o de um elemento da p·gina e retornar */
-    (*pagina).codigoReg[i+1]= 0;                 /* sua situaÁ„o de Underflow, caso exista, retorna verdade */
+    (*pagina).offsetPagina[i+1]= -1;             /* Fun√ß√£o respons√°vel por fazer a exclus√£o de um elemento da p√°gina e retornar */
+    (*pagina).codigoReg[i+1]= 0;                 /* sua situa√ß√£o de Underflow, caso exista, retorna verdade */
     (*pagina).offsetReg[i+1]= 0;
 
     if (posVazias> (PAGTAM/2)) return 1;
@@ -466,8 +465,8 @@ int redistribuicao(FILE *indice, ArvoreB *pagina, int codigoPai, int *posOffSet)
     for ((i= 0); (i<= PAGTAM); (i++)) {
         if (paginaPai.offsetPagina[i]== (*pagina).pagEndereco) {
             (*posOffSet)= i;
-            posPagVazias= PAGTAM-(PAGTAM/2);     /* Neste caso, se possÌvel, os elementos da p·gina com underflow s„o */
-                                                 /* redistribuÌdos com os da p·gina irm„ direita */
+            posPagVazias= PAGTAM-(PAGTAM/2);     /* Neste caso, se poss√≠vel, os elementos da p√°gina com underflow s√£o */
+                                                 /* redistribu√≠dos com os da p√°gina irm√£ direita */
             if (i< PAGTAM) {
                 fseek(indice, (paginaPai.offsetPagina[i+1]), SEEK_SET);
                 paginaDireita.pagEndereco= paginaPai.offsetPagina[i+1];
@@ -490,21 +489,21 @@ int redistribuicao(FILE *indice, ArvoreB *pagina, int codigoPai, int *posOffSet)
                         paginaPai.offsetReg[i]= paginaDireita.offsetReg[posRemocao];
                         removeOrdenado(&paginaDireita, (paginaPai.codigoReg[i]));
 
-                        posPagVazias--;          /* Se a p·gina irm„ direita apresentar elementos suficientes, */
-                        posVizVazias++;          /* processo de redistribuiÁ„o È iniciado */
+                        posPagVazias--;          /* Se a p√°gina irm√£ direita apresentar elementos suficientes, */
+                        posVizVazias++;          /* processo de redistribui√ß√£o √© iniciado */
                         posRemocao++;
                     } while(posPagVazias> posVizVazias);
 
                     imprimeIndice(indice, paginaPai);
                     imprimeIndice(indice, paginaDireita);
-                    return (sucesso= 1);         /* Retorno de informaÁ„o de operaÁ„o bem sucedida */
+                    return (sucesso= 1);         /* Retorno de informa√ß√£o de opera√ß√£o bem sucedida */
                 }
             }
             if ((!sucesso) && (i> 0) && (paginaPai.offsetPagina[i-1]!= -1)) {
                 fseek(indice, (paginaPai.offsetPagina[i-1]), SEEK_SET);
                 paginaEsquerda.pagEndereco= paginaPai.offsetPagina[i-1];
-                posVizVazias= 0;       /* Neste caso, se n„o houve redistribuiÁ„o com a p·gina irm„ direita, se possÌvel, */
-                                       /* os elementos da p·gina com underflow s„o redistribuÌdos com os da p·gina irm„ esquerda */
+                posVizVazias= 0;       /* Neste caso, se n√£o houve redistribui√ß√£o com a p√°gina irm√£ direita, se poss√≠vel, */
+                                       /* os elementos da p√°gina com underflow s√£o redistribu√≠dos com os da p√°gina irm√£ esquerda */
                 for ((j= 0); (j< PAGTAM); (j++)) {
                     fread(&(paginaEsquerda.offsetPagina[j]), CARQTDE, 1, indice);
                     fread(&(paginaEsquerda.codigoReg[j]), CARQTDE, 1, indice);
@@ -524,20 +523,20 @@ int redistribuicao(FILE *indice, ArvoreB *pagina, int codigoPai, int *posOffSet)
                         paginaPai.offsetReg[i-1]= paginaEsquerda.offsetReg[PAGTAM-1];
 
                         removeOrdenado(&paginaEsquerda, (paginaPai.codigoReg[i-1]));
-                        posPagVazias--;          /* Se a p·gina irm„ esquerda apresentar elementos suficientes, */
-                        posVizVazias++;          /* processo de redistribuiÁ„o È iniciado */
+                        posPagVazias--;          /* Se a p√°gina irm√£ esquerda apresentar elementos suficientes, */
+                        posVizVazias++;          /* processo de redistribui√ß√£o √© iniciado */
                     } while(posPagVazias> posVizVazias);
 
                     imprimeIndice(indice, (*pagina));
                     imprimeIndice(indice, paginaPai);
                     imprimeIndice(indice, paginaEsquerda);
-                    return (sucesso= 1);         /* OperaÁ„o bem sucedida */
+                    return (sucesso= 1);         /* Opera√ß√£o bem sucedida */
                 }
             }
             i= PAGTAM + 1;
         }
     }
-    return sucesso;          /* Retorno de informaÁ„o de operaÁ„o bem sucedida ou n„o */
+    return sucesso;          /* Retorno de informa√ß√£o de opera√ß√£o bem sucedida ou n√£o */
 }
 
 int concatenacao(FILE *indice, ArvoreB *pagina, int *codigoPai, int posOffSet, long raiz) {
@@ -551,8 +550,8 @@ int concatenacao(FILE *indice, ArvoreB *pagina, int *codigoPai, int posOffSet, l
     if (posOffSet< PAGTAM) {
         fseek(indice, paginaPai.offsetPagina[posOffSet+1], SEEK_SET);
         auxPagina.pagEndereco= paginaPai.offsetPagina[posOffSet+1];
-        posVizVazias= 0;                         /* Neste caso os elementos da p·gina em underflow s„o concatenados */
-                                                 /* com os da p·gina irm„ direita */
+        posVizVazias= 0;                         /* Neste caso os elementos da p√°gina em underflow s√£o concatenados */
+                                                 /* com os da p√°gina irm√£ direita */
         for ((i= 0); (i< PAGTAM); (i++)) {
             fread(&(auxPagina.offsetPagina[i]), CARQTDE, 1, indice);
             fread(&(auxPagina.codigoReg[i]), CARQTDE, 1, indice);
@@ -562,7 +561,7 @@ int concatenacao(FILE *indice, ArvoreB *pagina, int *codigoPai, int posOffSet, l
         }
         fread(&(auxPagina.offsetPagina[i]), CARQTDE, 1, indice);
 
-        if (posVizVazias== (PAGTAM/2)) {         /* Processo de concatenaÁ„o È iniciado */
+        if (posVizVazias== (PAGTAM/2)) {         /* Processo de concatena√ß√£o √© iniciado */
             auxPagina.codigoReg[posVizVazias-1]= paginaPai.codigoReg[posOffSet];
             auxPagina.offsetReg[posVizVazias-1]= paginaPai.offsetReg[posOffSet];
 
@@ -575,7 +574,7 @@ int concatenacao(FILE *indice, ArvoreB *pagina, int *codigoPai, int posOffSet, l
             }
             else if (paginaPai.codigoReg[PAGTAM-1]== 0) {
                 push(indice, paginaPai);
-                fseek(indice, 0, SEEK_SET);      /* Caso em que a altura da ·rvore È reduzida: exclus„o e empilhamento da antiga raiz */
+                fseek(indice, 0, SEEK_SET);      /* Caso em que a altura da √°rvore √© reduzida: exclus√£o e empilhamento da antiga raiz */
                 fwrite(&(auxPagina.pagEndereco), CARQTDE, 1, indice);
             }
             else {
@@ -587,14 +586,14 @@ int concatenacao(FILE *indice, ArvoreB *pagina, int *codigoPai, int posOffSet, l
             auxPagina.codigoReg[posVizVazias-1]= (*pagina).codigoReg[PAGTAM-1];
             auxPagina.offsetReg[posVizVazias-1]= (*pagina).offsetReg[PAGTAM-1];
             auxPagina.offsetPagina[posVizVazias]= (*pagina).offsetPagina[PAGTAM];
-            sucesso= 1;                /* OperaÁ„o bem sucedida */
+            sucesso= 1;                /* Opera√ß√£o bem sucedida */
         }
     }
     if ((!sucesso) && (posOffSet> 0) && (paginaPai.offsetPagina[posOffSet-1]!= -1)) {
         fseek(indice, paginaPai.offsetPagina[posOffSet-1], SEEK_SET);
         auxPagina.pagEndereco= paginaPai.offsetPagina[posOffSet-1];
-        posVizVazias= 0;               /* Neste caso, se a concatenaÁ„o com a p·gina irm„ direita n„o foi bem sucedida, os */
-                                       /* elementos da p·gina em underflow s„o concatenados com os da p·gina irm„ esquerda */
+        posVizVazias= 0;               /* Neste caso, se a concatena√ß√£o com a p√°gina irm√£ direita n√£o foi bem sucedida, os */
+                                       /* elementos da p√°gina em underflow s√£o concatenados com os da p√°gina irm√£ esquerda */
         for ((i= 0); (i< PAGTAM); (i++)) {
             fread(&(auxPagina.offsetPagina[i]), CARQTDE, 1, indice);
             fread(&(auxPagina.codigoReg[i]), CARQTDE, 1, indice);
@@ -604,7 +603,7 @@ int concatenacao(FILE *indice, ArvoreB *pagina, int *codigoPai, int posOffSet, l
         }
         fread(&(auxPagina.offsetPagina[i]), CARQTDE, 1, indice);
 
-        if (posVizVazias== (PAGTAM/2)) {         /* Processo de concatenaÁ„o È iniciado */
+        if (posVizVazias== (PAGTAM/2)) {         /* Processo de concatena√ß√£o √© iniciado */
             insereOrdenado(indice, &auxPagina, paginaPai.codigoReg[posOffSet-1], paginaPai.offsetReg[posOffSet-1], (*pagina).offsetPagina[PAGTAM-1]);
             insereOrdenado(indice, &auxPagina, (*pagina).codigoReg[PAGTAM-1], (*pagina).offsetReg[PAGTAM-1], (*pagina).offsetPagina[PAGTAM]);
 
@@ -617,7 +616,7 @@ int concatenacao(FILE *indice, ArvoreB *pagina, int *codigoPai, int posOffSet, l
             }
             else if (paginaPai.codigoReg[PAGTAM-1]== 0) {
                 push(indice, paginaPai);
-                fseek(indice, 0, SEEK_SET);      /* Altura da ·rvore È reduzida: exclus„o e empilhamento da antiga raiz */
+                fseek(indice, 0, SEEK_SET);      /* Altura da √°rvore √© reduzida: exclus√£o e empilhamento da antiga raiz */
                 fwrite(&(auxPagina.pagEndereco), CARQTDE, 1, indice);
             }
             else {
@@ -626,11 +625,11 @@ int concatenacao(FILE *indice, ArvoreB *pagina, int *codigoPai, int posOffSet, l
             }
         }
     }
-    push(indice, (*pagina));           /* P·gina concatenada È excluÌda e empilhada */
+    push(indice, (*pagina));           /* P√°gina concatenada √© exclu√≠da e empilhada */
     imprimeIndice(indice, auxPagina);
-    (*pagina)= paginaPai;    /* Note que quem retorna È a p·gina "pai" da p·gina concatenada: tratamento de underflow propagado */
+    (*pagina)= paginaPai;    /* Note que quem retorna √© a p√°gina "pai" da p√°gina concatenada: tratamento de underflow propagado */
 
-    return underFlow;        /* Retorno de informaÁ„o sobre propagaÁ„o de underflow */
+    return underFlow;        /* Retorno de informa√ß√£o sobre propaga√ß√£o de underflow */
 }
 
 void buscaMenor(FILE *indice, ArvoreB *pagina, int *codigo, int *codigoPai) {
@@ -640,12 +639,12 @@ void buscaMenor(FILE *indice, ArvoreB *pagina, int *codigo, int *codigoPai) {
 
     for ((i= (PAGTAM-1)); (i>= 0); (i--)) if ((*pagina).codigoReg[i]== (*codigo)) {
         posTroca= i;
-        posPagina= (*pagina).offsetPagina[i+1];  /* Busca pela posiÁ„o, na p·gina interna, do elemento a ser excluÌdo */
+        posPagina= (*pagina).offsetPagina[i+1];  /* Busca pela posi√ß√£o, na p√°gina interna, do elemento a ser exclu√≠do */
         i= -1;
     }
     do {
-        fseek(indice, posPagina, SEEK_SET);      /* Busca pela folha que contÈm o elemento adequado para troca com o elemento */
-        auxPagina.pagEndereco= posPagina;        /* a ser excluÌdo na p·gina interna: menor elemento da p·gina mais a esquerda */
+        fseek(indice, posPagina, SEEK_SET);      /* Busca pela folha que cont√©m o elemento adequado para troca com o elemento */
+        auxPagina.pagEndereco= posPagina;        /* a ser exclu√≠do na p√°gina interna: menor elemento da p√°gina mais a esquerda */
 
         if (!flag) {
             for ((i= 0); (i< PAGTAM); (i++)) if (auxPagina.codigoReg[i]!= 0) {
@@ -658,11 +657,11 @@ void buscaMenor(FILE *indice, ArvoreB *pagina, int *codigo, int *codigoPai) {
         for ((i= 0); (i< PAGTAM); (i++)) {
             fread(&(auxPagina.offsetPagina[i]), CARQTDE, 1, indice);
             fread(&(auxPagina.codigoReg[i]), CARQTDE, 1, indice);
-            fread(&(auxPagina.offsetReg[i]), CARQTDE, 1, indice);    /* Processamento das p·ginas atÈ encontrar a adequada */
+            fread(&(auxPagina.offsetReg[i]), CARQTDE, 1, indice);    /* Processamento das p√°ginas at√© encontrar a adequada */
 
             if ((flag) && (auxPagina.codigoReg[i]!= 0)) {
                 (*codigo)= auxPagina.codigoReg[i];
-                auxOffsetReg= auxPagina.offsetReg[i];      /* Armazenamento do menor elemento da p·gina encontrada */
+                auxOffsetReg= auxPagina.offsetReg[i];      /* Armazenamento do menor elemento da p√°gina encontrada */
                 posPagina= auxPagina.offsetPagina[i];
                 flag= 0;
             }
@@ -670,12 +669,12 @@ void buscaMenor(FILE *indice, ArvoreB *pagina, int *codigo, int *codigoPai) {
         fread(&(auxPagina.offsetPagina[i]), CARQTDE, 1, indice);
     } while(!verificaFolha(auxPagina));
 
-    (*pagina).codigoReg[posTroca]= (*codigo);    /* Troca com o menor elemento da p·gina mais a esquerda: "exclus„o" */
+    (*pagina).codigoReg[posTroca]= (*codigo);    /* Troca com o menor elemento da p√°gina mais a esquerda: "exclus√£o" */
     (*pagina).offsetReg[posTroca]= auxOffsetReg;
     imprimeIndice(indice, (*pagina));
 
-    (*pagina)= auxPagina;              /* Note que quem volta para a funÁ„o remoÁ„o È a p·gina folha e o elemento usado */
-}                                      /* como troca, seguindo a regra de sÛ realizar verdadeiras exclusıes em folhas */
+    (*pagina)= auxPagina;              /* Note que quem volta para a fun√ß√£o remo√ß√£o √© a p√°gina folha e o elemento usado */
+}                                      /* como troca, seguindo a regra de s√≥ realizar verdadeiras exclus√µes em folhas */
 
 void removeIndice(FILE *indice, ArvoreB pagina, int codigo, int codigoPai) {
     int underFlow= 0;
@@ -683,11 +682,11 @@ void removeIndice(FILE *indice, ArvoreB pagina, int codigo, int codigoPai) {
 
     fseek(indice, 0, SEEK_SET);
     fread(&raiz, CARQTDE, 1, indice);
-                                       /* Exclus„o de elemento em p·gina interna, busca de um substituto em folha */
+                                       /* Exclus√£o de elemento em p√°gina interna, busca de um substituto em folha */
     if (!verificaFolha(pagina)) buscaMenor(indice, &pagina, &codigo, &codigoPai);
-                                       /* Note que a p·gina anteriormente interna volta como folha */
+                                       /* Note que a p√°gina anteriormente interna volta como folha */
     underFlow= removeOrdenado(&pagina, codigo);
-                                       /* Se houver underflow, necessidade de reorganizaÁ„o */
+                                       /* Se houver underflow, necessidade de reorganiza√ß√£o */
     if ((underFlow) && (pagina.pagEndereco!= raiz)) reorganizaArvore(indice, &pagina, codigoPai, underFlow, raiz);
     else imprimeIndice(indice, pagina);
 }
@@ -696,11 +695,11 @@ void reorganizaArvore(FILE *indice, ArvoreB *pagina, int codigoPai, int underFlo
     int redistribuiu= 1, posOffSet= 0;
 
     redistribuiu= redistribuicao(indice, pagina, codigoPai, &posOffSet);
-                                       /* RedistribuiÁ„o pode ou n„o ser aplicada, se n„o: concatenaÁ„o */
+                                       /* Redistribui√ß√£o pode ou n√£o ser aplicada, se n√£o: concatena√ß√£o */
     if (!redistribuiu) {
         underFlow= concatenacao(indice, pagina, &codigoPai, posOffSet, raiz);
         if (underFlow) reorganizaArvore(indice, pagina, codigoPai, underFlow, raiz);
-    }                                  /* Se o underflow se propagou, volto recursivamente reorganizando as p·ginas "pai" */
+    }                                  /* Se o underflow se propagou, volto recursivamente reorganizando as p√°ginas "pai" */
 }
 
 long buscaReferecia(FILE *indice, FILE *dados) {
@@ -717,15 +716,15 @@ long buscaReferecia(FILE *indice, FILE *dados) {
 
     if (byteOffset< 0) printf("\n\nReferencia inexistente!!!\n\n");
     else {
-        fseek(dados, byteOffset, SEEK_SET);      /* ApÛs pesquisa bem sucedida, os campos do registro s„o separados pelos */
-        fgets(registro, REGTAM, dados);          /* delimitadores de campo e impressos para o usu·rio */
+        fseek(dados, byteOffset, SEEK_SET);      /* Ap√≥s pesquisa bem sucedida, os campos do registro s√£o separados pelos */
+        fgets(registro, REGTAM, dados);          /* delimitadores de campo e impressos para o usu√°rio */
 
         for ((i= 0); (i< 5); (i++)) {
             sscanf(&(registro[posicao]), DELIMITACAO, campo);
             posicao += (strlen(campo) + 1);
 
             if (i== 0) printf("\n\nCodigo: %s", campo);
-            else if (i== 1) printf("\nTitulo: %s", campo);      /* Impress„o dos campos da referÍncia */
+            else if (i== 1) printf("\nTitulo: %s", campo);      /* Impress√£o dos campos da refer√™ncia */
             else if (i== 2) printf("\nAutor: %s", campo);
             else if (i== 3) printf("\nAno de Publicacao: %s", campo);
             else if (i== 4) printf("\nVeiculo: %s", campo);
@@ -754,7 +753,7 @@ long pesquisaArquivo(FILE *indice, ArvoreB *pagEncontrada, int codigo, int *codi
             }
         }
         for ((i= 0); (i< PAGTAM); (i++)) {
-            fread(&(pagina.offsetPagina[i]), CARQTDE, 1, indice);    /* Cada p·gina È devidamente processada */
+            fread(&(pagina.offsetPagina[i]), CARQTDE, 1, indice);    /* Cada p√°gina √© devidamente processada */
             fread(&(pagina.codigoReg[i]), CARQTDE, 1, indice);
             fread(&(pagina.offsetReg[i]), CARQTDE, 1, indice);
         }
@@ -764,10 +763,10 @@ long pesquisaArquivo(FILE *indice, ArvoreB *pagEncontrada, int codigo, int *codi
         flag= 1;
 
         for ((i= 0); (i< PAGTAM); (i++)) {
-            if (codigo< pagina.codigoReg[i]) {   /* Conforme organizaÁ„o da ¡rvore-B, obtÈm-se o endereÁo da prÛxima p·gina */
+            if (codigo< pagina.codigoReg[i]) {   /* Conforme organiza√ß√£o da √Årvore-B, obt√©m-se o endere√ßo da pr√≥xima p√°gina */
                 raiz= pagina.offsetPagina[i];
                 i= PAGTAM;
-            }                                    /* Se o elemento foi encontrado, h· o retorno de seu endereÁo */
+            }                                    /* Se o elemento foi encontrado, h√° o retorno de seu endere√ßo */
             else if (codigo== pagina.codigoReg[i]) return pagina.offsetReg[i];
         }
         if (codigo> pagina.codigoReg[PAGTAM-1]) raiz= pagina.offsetPagina[PAGTAM];
@@ -777,5 +776,5 @@ long pesquisaArquivo(FILE *indice, ArvoreB *pagEncontrada, int codigo, int *codi
 
 void finalizaExecucao(FILE *indice, FILE *dados) {
     fclose(indice);
-    fclose(dados);                     /* Arquivos de dados e Ìndices s„o fechados com a finalizaÁ„o do programa */
+    fclose(dados);                     /* Arquivos de dados e √≠ndices s√£o fechados com a finaliza√ß√£o do programa */
 }
