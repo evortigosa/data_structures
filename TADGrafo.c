@@ -1,6 +1,6 @@
 /* Algoritmos e Estruturas de Dados II - Trabalho 1 - Grafos
-        Evandro Scudeleti Ortigossa, n° USP 6793135
-       Bacharelado em Ciências de Computação 2009           */
+        Evandro Scudeleti Ortigossa, nÂ° USP 6793135
+       Bacharelado em CiÃªncias de ComputaÃ§Ã£o 2009           */
 
 #include <stdio.h>
 #include <stdlib.h>
