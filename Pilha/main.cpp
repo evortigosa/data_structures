@@ -6,6 +6,7 @@ Evandro Scudeleti Ortigossa, nUSP 6793135 */
 
 using namespace std;
 
+
 int main() {
     MyStack s1(6); //Pilha de no máximo 6 elementos
     MyStack s2(7); //Pilha de no máximo 7 elementos

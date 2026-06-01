@@ -6,6 +6,7 @@ Evandro Scudeleti Ortigossa, nUSP 6793135 */
 
 using namespace std;
 
+
 MyStack::MyStack(int maxsize) {
     this->maxsize= maxsize;
     top= -1;

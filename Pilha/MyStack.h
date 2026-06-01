@@ -1,8 +1,9 @@
-/*        Aula Pr√°tica 4 - POO -
+/*        Aula Pr·tica 4 - POO -
 Evandro Scudeleti Ortigossa, nUSP 6793135 */
 
 #ifndef MYSTACK_H_INCLUDED
 #define MYSTACK_H_INCLUDED
+
 
 class MyStack {
     public:
