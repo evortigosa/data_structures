@@ -62,6 +62,10 @@ void removeReferencia(FILE *, FILE *);
 int verificaFolha(ArvoreB);
 void push(FILE *, ArvoreB);
 int contaChaves(ArvoreB);
+void paginaParaVetores(ArvoreB, int *, long *, long *, int *);
+void vetoresParaPagina(ArvoreB *, int *, long *, long *, int);
+int indiceFilho(ArvoreB, long);
+void removeSeparadorPai(int *, long *, long *, int *, int);
 int removeOrdenado(ArvoreB *, int);
 int redistribuicao(FILE *, ArvoreB *, long, int *);
 int primeiraChave(ArvoreB);
@@ -280,7 +284,8 @@ void imprimeReferencia(FILE *indice, FILE *dados, Referencia registro, long posi
         fseek(dados, posicao, SEEK_SET);
     }
     fprintf(dados, "%s%c%s%c%s%c%s%c%s%c", 
-            registro.codigo, DELIMITADOR, registro.titulo, DELIMITADOR, registro.autor, DELIMITADOR, registro.anoPublicacao, DELIMITADOR, registro.veiculo, DELIMITADOR);
+            registro.codigo, DELIMITADOR, registro.titulo, DELIMITADOR, registro.autor, DELIMITADOR, 
+            registro.anoPublicacao, DELIMITADOR, registro.veiculo, DELIMITADOR);
 
     for ((i= tamanho); (i< REGTAM); (i++)) {
         fputc(PREENCHE, dados);
@@ -549,6 +554,63 @@ int contaChaves(ArvoreB pagina) {
     return n;
 }
 
+void paginaParaVetores(ArvoreB pagina, int *codigo, long *offsetReg, long *offsetPagina, int *n) {
+    int i, primeiro;
+
+    (*n)= contaChaves(pagina);
+    primeiro= PAGTAM - (*n);
+
+    for ((i= 0); (i<= PAGTAM); (i++)) {
+        offsetPagina[i]= -1;
+    }
+    for ((i= 0); (i< (*n)); (i++)) {
+        codigo[i]= pagina.codigoReg[primeiro+i];
+        offsetReg[i]= pagina.offsetReg[primeiro+i];
+        offsetPagina[i]= pagina.offsetPagina[primeiro+i];
+    }
+    offsetPagina[*n]= pagina.offsetPagina[primeiro+(*n)];
+}
+
+void vetoresParaPagina(ArvoreB *pagina, int *codigo, long *offsetReg, long *offsetPagina, int n) {
+    int i, primeiro;
+    long endereco;
+
+    endereco= (*pagina).pagEndereco;
+    inicializaPagina(pagina, endereco);
+    primeiro= PAGTAM - n;
+
+    for ((i= 0); (i< n); (i++)) {
+        (*pagina).offsetPagina[primeiro+i]= offsetPagina[i];
+        (*pagina).codigoReg[primeiro+i]= codigo[i];
+        (*pagina).offsetReg[primeiro+i]= offsetReg[i];
+    }
+    (*pagina).offsetPagina[primeiro+n]= offsetPagina[n];
+}
+
+int indiceFilho(ArvoreB paginaPai, long enderecoFilho) {
+    int i;
+
+    for ((i= 0); (i<= PAGTAM); (i++)) {
+        if (paginaPai.offsetPagina[i]== enderecoFilho) return i;
+    }
+    return -1;
+}
+
+void removeSeparadorPai(int *codigoPai, long *offsetRegPai, long *offsetPaginaPai, int *nPai, int posSeparador) {
+    int i;
+
+    for ((i= posSeparador); (i< (*nPai)-1); (i++)) {
+        codigoPai[i]= codigoPai[i+1];
+        offsetRegPai[i]= offsetRegPai[i+1];
+    }
+
+    for ((i= posSeparador+1); (i< (*nPai)); (i++)) {
+        offsetPaginaPai[i]= offsetPaginaPai[i+1];
+    }
+
+    (*nPai)--;
+}
+
 int removeOrdenado(ArvoreB *pagina, int codigo) {
     int posRemocao= -1, posVazias= 1, i;
 
@@ -576,83 +638,90 @@ int removeOrdenado(ArvoreB *pagina, int codigo) {
 }
 
 int redistribuicao(FILE *indice, ArvoreB *pagina, long enderecoPai, int *posOffSet) {
-    /*
-        TODO: internal-node underflow is still not fully handled. 
-    */
-    int posVizVazias, posPagVazias, posRemocao, sucesso= 0, i, j;
-    ArvoreB paginaPai, paginaDireita, paginaEsquerda;
+    int i, posFilho, nPag, nPai, nIrma;
+    int codPag[PAGTAM+1], codPai[PAGTAM+1], codIrma[PAGTAM+1];
+    long regPag[PAGTAM+1], regPai[PAGTAM+1], regIrma[PAGTAM+1];
+    long filhoPag[PAGTAM+2], filhoPai[PAGTAM+2], filhoIrma[PAGTAM+2];
+    ArvoreB paginaPai, paginaIrma;
 
-    if (!lePagina(indice, enderecoPai, &paginaPai)) {
-        return 0;
-    }
+    if (!lePagina(indice, enderecoPai, &paginaPai)) return 0;
 
-    for ((i= 0); (i<= PAGTAM); (i++)) {
-        if (paginaPai.offsetPagina[i]== (*pagina).pagEndereco) {
-            (*posOffSet)= i;
-            posPagVazias= PAGTAM-(PAGTAM/2);     /* Neste caso, se possível, os elementos da página com underflow são */
-                                                 /* redistribuídos com os da página irmã direita */
-            if ((i< PAGTAM) && (paginaPai.offsetPagina[i+1]!= -1)) {
-                if (!lePagina(indice, paginaPai.offsetPagina[i+1], &paginaDireita)) {
-                    return 0;
+    (*posOffSet)= indiceFilho(paginaPai, (*pagina).pagEndereco);
+    if ((*posOffSet)< 0) return 0;
+
+    paginaParaVetores(paginaPai, codPai, regPai, filhoPai, &nPai);
+    paginaParaVetores((*pagina), codPag, regPag, filhoPag, &nPag);
+
+    posFilho= (*posOffSet) - (PAGTAM - nPai);
+    if ((posFilho< 0) || (posFilho> nPai)) return 0;
+
+    if (posFilho< nPai) {                                             /* Neste caso, se possível, os elementos da página com underflow são */
+        if (lePagina(indice, filhoPai[posFilho+1], &paginaIrma)) {    /* redistribuídos com os da página irmã direita */
+            paginaParaVetores(paginaIrma, codIrma, regIrma, filhoIrma, &nIrma);
+
+            if (nIrma> (PAGTAM/2)) {
+                codPag[nPag]= codPai[posFilho];
+                regPag[nPag]= regPai[posFilho];
+                filhoPag[nPag+1]= filhoIrma[0];
+                nPag++;
+
+                codPai[posFilho]= codIrma[0];
+                regPai[posFilho]= regIrma[0];
+
+                for ((i= 0); (i< nIrma-1); (i++)) {
+                    codIrma[i]= codIrma[i+1];
+                    regIrma[i]= regIrma[i+1];
                 }
-                posVizVazias= 0, posRemocao= -1;
-
-                for ((j= 0); (j< PAGTAM); (j++)) {
-                    if (paginaDireita.codigoReg[j]== 0) posVizVazias++;
-                    if ((paginaDireita.codigoReg[j]!= 0) && (posRemocao== -1)) posRemocao= j;
+                for ((i= 0); (i< nIrma); (i++)) {
+                    filhoIrma[i]= filhoIrma[i+1];
                 }
+                nIrma--;
 
-                if ((posVizVazias< (PAGTAM/2)) && (verificaFolha(paginaDireita))) {
-                    do {
-                        insereOrdenado(indice, pagina, (paginaPai.codigoReg[i]), (paginaPai.offsetReg[i]), (paginaDireita.offsetPagina[posRemocao]));
-                        paginaPai.codigoReg[i]= paginaDireita.codigoReg[posRemocao];
-                        paginaPai.offsetReg[i]= paginaDireita.offsetReg[posRemocao];
-                        removeOrdenado(&paginaDireita, (paginaPai.codigoReg[i]));
+                vetoresParaPagina(pagina, codPag, regPag, filhoPag, nPag);
+                vetoresParaPagina(&paginaPai, codPai, regPai, filhoPai, nPai);
+                vetoresParaPagina(&paginaIrma, codIrma, regIrma, filhoIrma, nIrma);
+                imprimeIndice(indice, (*pagina));
+                imprimeIndice(indice, paginaPai);
+                imprimeIndice(indice, paginaIrma);
 
-                        posPagVazias--;          /* Se a página irmã direita apresentar elementos suficientes, */
-                        posVizVazias++;          /* processo de redistribuição é iniciado */
-                        posRemocao++;
-                    } while(posPagVazias> posVizVazias);
-
-                    imprimeIndice(indice, paginaPai);
-                    imprimeIndice(indice, paginaDireita);
-                    return (sucesso= 1);         /* Retorno de informação de operação bem sucedida */
-                }
+                return 1;    /* Retorno de informação de operação bem sucedida */
             }
-            if ((!sucesso) && (i> 0) && (paginaPai.offsetPagina[i-1]!= -1)) {
-                if (!lePagina(indice, paginaPai.offsetPagina[i-1], &paginaEsquerda)) {
-                    return 0;
-                }
-                posVizVazias= 0;    /* Neste caso, se não houve redistribuição com a página irmã direita, se possível, */
-                                   /* os elementos da página com underflow são redistribuídos com os da página irmã esquerda */
-                for ((j= 0); (j< PAGTAM); (j++)) {
-                    if (paginaEsquerda.codigoReg[j]== 0) posVizVazias++;
-                }
-
-                if ((posVizVazias< (PAGTAM/2)) && (verificaFolha(paginaEsquerda))) {
-                    do {
-                        (*pagina).codigoReg[posPagVazias]= paginaPai.codigoReg[i-1];
-                        (*pagina).offsetReg[posPagVazias]= paginaPai.offsetReg[i-1];
-                        (*pagina).offsetPagina[posPagVazias]= paginaEsquerda.offsetPagina[PAGTAM];
-
-                        paginaPai.codigoReg[i-1]= paginaEsquerda.codigoReg[PAGTAM-1];
-                        paginaPai.offsetReg[i-1]= paginaEsquerda.offsetReg[PAGTAM-1];
-
-                        removeOrdenado(&paginaEsquerda, (paginaPai.codigoReg[i-1]));
-                        posPagVazias--;          /* Se a página irmã esquerda apresentar elementos suficientes, */
-                        posVizVazias++;          /* processo de redistribuição é iniciado */
-                    } while(posPagVazias> posVizVazias);
-
-                    imprimeIndice(indice, (*pagina));
-                    imprimeIndice(indice, paginaPai);
-                    imprimeIndice(indice, paginaEsquerda);
-                    return (sucesso= 1);         /* Operação bem sucedida */
-                }
-            }
-            i= PAGTAM + 1;
         }
     }
-    return sucesso;          /* Retorno de informação de operação bem sucedida ou não */
+
+    if (posFilho> 0) {                                                /* Neste caso, se não houve redistribuição com a página irmã direita, se possível, */
+        if (lePagina(indice, filhoPai[posFilho-1], &paginaIrma)) {    /* os elementos da página com underflow são redistribuídos com os da página irmã esquerda */
+            paginaParaVetores(paginaIrma, codIrma, regIrma, filhoIrma, &nIrma);
+
+            if (nIrma> (PAGTAM/2)) {
+                for ((i= nPag); (i> 0); (i--)) {
+                    codPag[i]= codPag[i-1];
+                    regPag[i]= regPag[i-1];
+                }
+                for ((i= nPag+1); (i> 0); (i--)) {
+                    filhoPag[i]= filhoPag[i-1];
+                }
+                codPag[0]= codPai[posFilho-1];
+                regPag[0]= regPai[posFilho-1];
+                filhoPag[0]= filhoIrma[nIrma];
+                nPag++;
+
+                codPai[posFilho-1]= codIrma[nIrma-1];
+                regPai[posFilho-1]= regIrma[nIrma-1];
+                nIrma--;
+
+                vetoresParaPagina(pagina, codPag, regPag, filhoPag, nPag);
+                vetoresParaPagina(&paginaPai, codPai, regPai, filhoPai, nPai);
+                vetoresParaPagina(&paginaIrma, codIrma, regIrma, filhoIrma, nIrma);
+                imprimeIndice(indice, (*pagina));
+                imprimeIndice(indice, paginaPai);
+                imprimeIndice(indice, paginaIrma);
+
+                return 1;    /* Operação bem sucedida */
+            }
+        }
+    }
+    return 0;
 }
 
 int primeiraChave(ArvoreB pagina) {
@@ -681,97 +750,107 @@ long buscaPaiDaPagina(FILE *indice, ArvoreB pagina) {
 }
 
 int concatenacao(FILE *indice, ArvoreB *pagina, long *enderecoPai, int posOffSet, long raiz) {
-    int posVizVazias, sucesso= 0, underFlow= 0, i;
-    long enderecoAvo;
-    ArvoreB paginaPai, auxPagina;
+    int i, posFilho, nPag, nPai, nIrma, nMerge, posSeparador;
+    int codPag[PAGTAM+1], codPai[PAGTAM+1], codIrma[PAGTAM+1], codMerge[PAGTAM+1];
+    long regPag[PAGTAM+1], regPai[PAGTAM+1], regIrma[PAGTAM+1], regMerge[PAGTAM+1];
+    long filhoPag[PAGTAM+2], filhoPai[PAGTAM+2], filhoIrma[PAGTAM+2], filhoMerge[PAGTAM+2];
+    long enderecoAvo, enderecoNovaPagina;
+    ArvoreB paginaPai, paginaIrma, paginaMerge;
 
-    if (!lePagina(indice, *enderecoPai, &paginaPai)) {
+    if (!lePagina(indice, *enderecoPai, &paginaPai)) return 0;
+
+    enderecoAvo= buscaPaiDaPagina(indice, paginaPai);
+    paginaParaVetores(paginaPai, codPai, regPai, filhoPai, &nPai);
+    paginaParaVetores((*pagina), codPag, regPag, filhoPag, &nPag);
+
+    posFilho= posOffSet - (PAGTAM - nPai);
+    if ((posFilho< 0) || (posFilho> nPai)) return 0;
+
+    if (posFilho< nPai) {    /* Preferência: concatenar os elementos da página em underflow com a irmã direita, mantendo a página atual */
+        if (!lePagina(indice, filhoPai[posFilho+1], &paginaIrma)) return 0;
+
+        paginaParaVetores(paginaIrma, codIrma, regIrma, filhoIrma, &nIrma);
+        nMerge= 0;
+
+        for ((i= 0); (i< nPag); (i++)) {
+            codMerge[nMerge]= codPag[i];
+            regMerge[nMerge]= regPag[i];
+            filhoMerge[nMerge]= filhoPag[i];
+            nMerge++;
+        }
+        filhoMerge[nMerge]= filhoPag[nPag];
+        codMerge[nMerge]= codPai[posFilho];
+        regMerge[nMerge]= regPai[posFilho];
+        filhoMerge[nMerge+1]= filhoIrma[0];
+        nMerge++;
+
+        for ((i= 0); (i< nIrma); (i++)) {
+            codMerge[nMerge]= codIrma[i];
+            regMerge[nMerge]= regIrma[i];
+            filhoMerge[nMerge+1]= filhoIrma[i+1];
+            nMerge++;
+        }
+        posSeparador= posFilho;
+        paginaMerge= (*pagina);
+        enderecoNovaPagina= paginaMerge.pagEndereco;
+        vetoresParaPagina(&paginaMerge, codMerge, regMerge, filhoMerge, nMerge);
+        removeSeparadorPai(codPai, regPai, filhoPai, &nPai, posSeparador);
+        filhoPai[posFilho]= enderecoNovaPagina;
+        push(indice, paginaIrma);
+    }
+    else if (posFilho> 0) {    /* Se a concatenação com a página irmã direita não ocorreu, doncatena com a irmã esquerda, */
+                               /* mantendo a irmã esquerda */
+        if (!lePagina(indice, filhoPai[posFilho-1], &paginaIrma)) return 0;
+
+        paginaParaVetores(paginaIrma, codIrma, regIrma, filhoIrma, &nIrma);
+        nMerge= 0;
+
+        for ((i= 0); (i< nIrma); (i++)) {
+            codMerge[nMerge]= codIrma[i];
+            regMerge[nMerge]= regIrma[i];
+            filhoMerge[nMerge]= filhoIrma[i];
+            nMerge++;
+        }
+        filhoMerge[nMerge]= filhoIrma[nIrma];
+        codMerge[nMerge]= codPai[posFilho-1];
+        regMerge[nMerge]= regPai[posFilho-1];
+        filhoMerge[nMerge+1]= filhoPag[0];
+        nMerge++;
+
+        for ((i= 0); (i< nPag); (i++)) {
+            codMerge[nMerge]= codPag[i];
+            regMerge[nMerge]= regPag[i];
+            filhoMerge[nMerge+1]= filhoPag[i+1];
+            nMerge++;
+        }
+        posSeparador= posFilho-1;
+        paginaMerge= paginaIrma;
+        enderecoNovaPagina= paginaMerge.pagEndereco;
+        vetoresParaPagina(&paginaMerge, codMerge, regMerge, filhoMerge, nMerge);
+        removeSeparadorPai(codPai, regPai, filhoPai, &nPai, posSeparador);
+        filhoPai[posSeparador]= enderecoNovaPagina;
+        push(indice, (*pagina));
+    }
+    else {
         return 0;
     }
-    enderecoAvo= buscaPaiDaPagina(indice, paginaPai);
+    imprimeIndice(indice, paginaMerge);
+
+    if ((paginaPai.pagEndereco== raiz) && (nPai== 0)) {
+        push(indice, paginaPai);
+        fseek(indice, 0, SEEK_SET);
+        fwrite(&(paginaMerge.pagEndereco), CARQTDE, 1, indice);
+        (*pagina)= paginaMerge;
+        (*enderecoPai)= -1;
+        return 0;
+    }
+    vetoresParaPagina(&paginaPai, codPai, regPai, filhoPai, nPai);
+    imprimeIndice(indice, paginaPai);
+    (*pagina)= paginaPai;    /* Note que quem retorna é a página "pai" da página concatenada: tratamento de underflow propagado */
     (*enderecoPai)= enderecoAvo;
 
-    if ((posOffSet< PAGTAM) && (paginaPai.offsetPagina[posOffSet+1]!= -1)) {
-        if (!lePagina(indice, paginaPai.offsetPagina[posOffSet+1], &auxPagina)) {
-            return 0;
-        }
-        posVizVazias= 0;    /* Neste caso os elementos da página em underflow são concatenados com os da página irmã direita */
-        
-        for ((i= 0); (i< PAGTAM); (i++)) {
-            if (auxPagina.codigoReg[i]== 0) posVizVazias++;
-        }
-
-        if (posVizVazias== (PAGTAM/2)) {         /* Processo de concatenação é iniciado */
-            auxPagina.codigoReg[posVizVazias-1]= paginaPai.codigoReg[posOffSet];
-            auxPagina.offsetReg[posVizVazias-1]= paginaPai.offsetReg[posOffSet];
-
-            underFlow= removeOrdenado(&paginaPai, paginaPai.codigoReg[posOffSet]);
-
-            if ((raiz== paginaPai.pagEndereco) && (paginaPai.codigoReg[PAGTAM-1]!= 0)) {
-                underFlow= 0;
-                paginaPai.offsetPagina[posOffSet+1]= auxPagina.pagEndereco;
-                imprimeIndice(indice, paginaPai);
-            }
-            else if (paginaPai.codigoReg[PAGTAM-1]== 0) {
-                underFlow= 0;
-                push(indice, paginaPai);
-                fseek(indice, 0, SEEK_SET);      /* Caso em que a altura da árvore é reduzida: exclusão e empilhamento da antiga raiz */
-                fwrite(&(auxPagina.pagEndereco), CARQTDE, 1, indice);
-            }
-            else {
-                paginaPai.offsetPagina[posOffSet+1]= auxPagina.pagEndereco;
-                imprimeIndice(indice, paginaPai);
-            }
-            posVizVazias--;
-            auxPagina.offsetPagina[posVizVazias-1]= (*pagina).offsetPagina[PAGTAM-1];
-            auxPagina.codigoReg[posVizVazias-1]= (*pagina).codigoReg[PAGTAM-1];
-            auxPagina.offsetReg[posVizVazias-1]= (*pagina).offsetReg[PAGTAM-1];
-            auxPagina.offsetPagina[posVizVazias]= (*pagina).offsetPagina[PAGTAM];
-            sucesso= 1;                /* Operação bem sucedida */
-        }
-    }
-    if ((!sucesso) && (posOffSet> 0) && (paginaPai.offsetPagina[posOffSet-1]!= -1)) {
-        if (!lePagina(indice, paginaPai.offsetPagina[posOffSet-1], &auxPagina)) {
-            return 0;
-        }
-        posVizVazias= 0;    /* Neste caso, se a concatenação com a página irmã direita não foi bem sucedida, os */
-                            /* elementos da página em underflow são concatenados com os da página irmã esquerda */
-        for ((i= 0); (i< PAGTAM); (i++)) {
-            if (auxPagina.codigoReg[i]== 0) posVizVazias++;
-        }
-
-        if (posVizVazias== (PAGTAM/2)) {         /* Processo de concatenação é iniciado */
-            insereOrdenado(indice, &auxPagina, paginaPai.codigoReg[posOffSet-1], paginaPai.offsetReg[posOffSet-1], (*pagina).offsetPagina[PAGTAM-1]);
-            insereOrdenado(indice, &auxPagina, (*pagina).codigoReg[PAGTAM-1], (*pagina).offsetReg[PAGTAM-1], (*pagina).offsetPagina[PAGTAM]);
-
-            underFlow= removeOrdenado(&paginaPai, paginaPai.codigoReg[posOffSet-1]);
-
-            if ((raiz== paginaPai.pagEndereco) && (paginaPai.codigoReg[PAGTAM-1]!= 0)) {
-                underFlow= 0;
-                paginaPai.offsetPagina[posOffSet]= auxPagina.pagEndereco;
-                imprimeIndice(indice, paginaPai);
-            }
-            else if (paginaPai.codigoReg[PAGTAM-1]== 0) {
-                underFlow= 0;
-                push(indice, paginaPai);
-                fseek(indice, 0, SEEK_SET);      /* Altura da árvore é reduzida: exclusão e empilhamento da antiga raiz */
-                fwrite(&(auxPagina.pagEndereco), CARQTDE, 1, indice);
-            }
-            else {
-                paginaPai.offsetPagina[posOffSet]= auxPagina.pagEndereco;
-                imprimeIndice(indice, paginaPai);
-            }
-            sucesso= 1;    /* Operação bem sucedida */
-        }
-    }
-    if (!sucesso) {
-        return underFlow;
-    }
-    push(indice, (*pagina));           /* Página concatenada é excluída e empilhada */
-    imprimeIndice(indice, auxPagina);
-    (*pagina)= paginaPai;    /* Note que quem retorna é a página "pai" da página concatenada: tratamento de underflow propagado */
-
-    return underFlow;        /* Retorno de informação sobre propagação de underflow */
+    if ((paginaPai.pagEndereco!= raiz) && (nPai< (PAGTAM/2))) return 1;
+    return 0;
 }
 
 int buscaMenor(FILE *indice, ArvoreB *pagina, int *codigo, long *enderecoPai) {
@@ -820,9 +899,6 @@ int buscaMenor(FILE *indice, ArvoreB *pagina, int *codigo, long *enderecoPai) {
 }
 
 void removeIndice(FILE *indice, ArvoreB pagina, int codigo, long enderecoPai) {
-    /*
-        TODO: partially supported; improve it when deletion causes underflow.
-    */
     int underFlow= 0;
     long raiz;
 
